@@ -1,5 +1,5 @@
-import { CHORDS, MAIN_CHORDS, ADDITIONAL_CHORDS, STRING_NAMES } from './chords-data.js?v=chords-2';
-import { PATTERNS } from './patterns-data.js?v=eighth-10';
+import { CHORDS, MAIN_CHORDS, ADDITIONAL_CHORDS, STRING_NAMES } from './chords-data.js?v=h2-1';
+import { PATTERNS } from './patterns-data.js?v=h2-1';
 
 const $ = selector => document.querySelector(selector);
 const appKey = 'guitar-constructor-session-v1';
@@ -318,6 +318,20 @@ export function setupControls(state, handlers) {
       storage.set(themeKey, next);
     });
     $('#st-play').addEventListener('click', () => $('#play').click());
+    const stLyrics = $('#st-lyrics');
+    if (stLyrics) {
+      ['wheel', 'touchstart', 'touchmove', 'pointerdown'].forEach(ev => stLyrics.addEventListener(ev, stageLyricsHold, { passive: true }));
+      stLyrics.addEventListener('scroll', () => { if (stageUserHold) stageScrollPos = stLyrics.scrollTop; }, { passive: true });
+    }
+    const stAuto = $('#st-autoscroll');
+    if (stAuto) {
+      stAuto.checked = $('#lyrics-autoscroll')?.checked || false;
+      stAuto.onchange = () => { const la = $('#lyrics-autoscroll'); if (la) la.checked = stAuto.checked; stageScrollPos = stLyrics ? stLyrics.scrollTop : 0; };
+      if (!stageScrollTimer) stageScrollTimer = setInterval(stageLyricsTick, 50);
+    }
+    const stSpeed = $('#st-speed');
+    if (stSpeed) { stSpeed.value = $('#lyrics-speed')?.value || 2; $('#st-speed-value').textContent = stSpeed.value; stSpeed.oninput = () => { $('#st-speed-value').textContent = stSpeed.value; const ls = $('#lyrics-speed'); if (ls) { ls.value = stSpeed.value; $('#lyrics-speed-value').textContent = stSpeed.value; } }; }
+    $('#lyrics-text')?.addEventListener('input', () => { const b = $('#st-lyrics'); if (b) b.value = $('#lyrics-text').value; });
     $('#st-stop').addEventListener('click', () => $('#stop').click());
     $('#to-stage').addEventListener('click', () => setView('stage'));
     $('#to-constructor').addEventListener('click', () => setView('constructor'));
@@ -446,8 +460,6 @@ export function renderStage(state) {
   $('#st-next').innerHTML = next.length
     ? next.map((o, i) => `<div class="ncard ${i === 0 ? 'soon' : ''}"><span class="n">${o.chord.name}</span><span class="m">${o.bars} такта</span><span class="from">${o.sectionName.toLowerCase()}</span></div>`).join('')
     : '<div class="ncard"><span class="m">Добавьте части — и здесь появится «дальше»</span></div>';
-  const lyr = (storage.get('guitar-constructor-lyrics-v1') || '').split('\n').filter(Boolean)[0];
-  $('#st-lyr').innerHTML = lyr ? `<b>${lyr}</b><br><span style="font-size:10.5px">Текст песни · автоскролл в разделе «Текст»</span>` : '';
   const seed = $('#st-seed'), graph = $('#st-graph');
   if (filled.length <= 1) {
     seed.style.display = 'flex'; graph.style.display = 'none';
@@ -472,16 +484,52 @@ export function renderStage(state) {
     graph.innerHTML = `<svg class="edges" viewBox="0 0 1392 216" preserveAspectRatio="none"><defs><marker id="st-a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" fill="var(--accent)"/></marker><marker id="st-m" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" fill="var(--muted)"/></marker></defs>${edges}</svg>` +
       filled.map(sec => {
         const p = pos[sec.id];
-        return `<section class="gnode sec-${(state.sections.indexOf(sec) % 3) + 1} ${sec.id === state.currentSectionId ? 'play' : ''}" data-section="${sec.id}" style="left:${p.x}px;top:${p.y}px"><div class="h"><i></i><b>${sec.name}</b><span class="m">×${state.songOrder.filter(x => x === sec.id).length} · ${sec.sequence.reduce((a, b) => a + b.bars, 0)} тактов</span></div><div class="strip2">${sec.sequence.slice(0, 5).map((bl, bi) => `<div class="cb" data-ci="${bi}"><div class="n">${bl.chord.name}</div><div class="a">${stArrow(state.pattern.strokes[0], true)}${stArrow(state.pattern.strokes[2] || state.pattern.strokes[0], true)}</div></div>`).join('')}</div></section>`;
+        return `<section class="gnode sec-${(state.sections.indexOf(sec) % 3) + 1} ${sec.id === state.currentSectionId ? 'play' : ''}" data-section="${sec.id}" style="left:${p.x}px;top:${p.y}px"><div class="h"><i></i><b>${sec.name}</b><span class="m">×${state.songOrder.filter(x => x === sec.id).length} · ${sec.sequence.reduce((a, b) => a + b.bars, 0)} тактов</span></div><div class="strip2">${sec.sequence.map((bl, bi) => `<div class="cb" data-ci="${bi}" title="${bl.chord.name}"><div class="n">${bl.chord.name}</div><div class="a">${stArrow(state.pattern.strokes[0], true)}${stArrow(state.pattern.strokes[2] || state.pattern.strokes[0], true)}</div></div>`).join('')}</div></section>`;
       }).join('');
+  }
+  const stLyrics = $('#st-lyrics');
+  if (stLyrics) {
+    const src = $('#lyrics-text')?.value || storage.get('guitar-constructor-lyrics-v1') || '';
+    if (stLyrics.value !== src) { stLyrics.value = src; stageScrollPos = 0; }
   }
   $('#st-hint').textContent = filled.length <= 1
     ? 'заполнена одна часть — карта свернулась в семечко'
     : filled.length === 2 ? 'вторая часть появилась — карта выросла: узлы, рёбра, повторы' : 'песня собрана — виден весь обход с петлёй цикла';
 }
 
+let stageScrollTimer = null, stageScrollPos = 0, stageUserHold = false, stageHoldTimer = null, lastNextKey = '';
+function stageNextHTML(state, item) {
+  const order = orderSequence(state);
+  const idx = order.findIndex(o => o.sectionId === item.sectionId && o.localIndex === item.localIndex);
+  const next = order.slice(idx + 1, idx + 4);
+  return next.length
+    ? next.map((o, i) => `<div class="ncard ${i === 0 ? 'soon' : ''}"><span class="n">${o.chord.name}</span><span class="m">${o.bars} такта</span><span class="from">${o.sectionName.toLowerCase()}</span></div>`).join('')
+    : '<div class="ncard"><span class="m">Конец песни · цикл вернёт к началу</span></div>';
+}
+function stageLyricsTick() {
+  const box = $('#st-lyrics');
+  if (!box || document.body.dataset.view !== 'stage') return;
+  if (!document.body.classList.contains('playing') || !$('#st-autoscroll')?.checked || stageUserHold) return;
+  const speed = (7 + Number($('#st-speed')?.value || 2)) * 0.075;
+  stageScrollPos += speed;
+  box.scrollTop = stageScrollPos;
+  if (box.scrollTop + box.clientHeight >= box.scrollHeight - 2) { $('#st-autoscroll').checked = false; }
+}
+function stageLyricsHold() {
+  const box = $('#st-lyrics'); if (!box || !$('#st-autoscroll')?.checked) return;
+  stageUserHold = true; stageScrollPos = box.scrollTop;
+  if (stageHoldTimer) clearTimeout(stageHoldTimer);
+  stageHoldTimer = setTimeout(() => { stageUserHold = false; stageScrollPos = box.scrollTop; }, 800);
+}
+
 export function updateStagePlayhead(item, step) {
   if (document.body.dataset.view !== 'stage' || !item) return;
+  const key = item.sectionId + ':' + item.localIndex;
+  if (key !== lastNextKey && currentState) { lastNextKey = key; const rail = $('#st-next'); if (rail) rail.innerHTML = stageNextHTML(currentState, item); }
+  document.querySelectorAll('.gnode .strip2').forEach(strip => {
+    const lit = strip.closest('.gnode')?.classList.contains('play') ? strip.querySelector('.cb.lit') : null;
+    if (lit) strip.scrollLeft = Math.max(0, lit.offsetLeft - (strip.clientWidth - lit.offsetWidth) / 2);
+  });
   $('#st-chord').textContent = item.chord.name;
   $('#st-bar').textContent = item.localIndex + 1;
   $('#st-hit').textContent = (step % 8) + 1;

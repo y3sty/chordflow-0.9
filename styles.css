@@ -388,7 +388,7 @@ html[data-theme="paper"] .ncard{background:var(--s1)}
 .ncard .m{font:600 9.5px var(--font-mono);color:var(--muted)}
 .ncard.soon{border-color:var(--accent)}
 .ncard .from{margin-left:auto;font-size:9px;font-weight:700;color:var(--muted);border:var(--border-w) solid var(--line);border-radius:99px;padding:3px 8px;white-space:nowrap}
-.rail .lyr{margin-top:auto;border-top:var(--border-w) solid var(--line);padding-top:12px;font-size:13.5px;line-height:1.65;color:var(--muted);font-style:italic}
+.rail .lyr-unused{margin-top:auto;border-top:var(--border-w) solid var(--line);padding-top:12px;font-size:13.5px;line-height:1.65;color:var(--muted);font-style:italic}
 .rail .lyr b{color:var(--text);font-style:normal}
 .horizon{flex:none;height:var(--hh);border-top:var(--border-w) solid var(--line);background:var(--s1);position:relative;overflow:hidden;background-image:radial-gradient(var(--line) 1px, transparent 1.4px);background-size:24px 24px;transition:height .25s ease-out}
 html[data-theme="paper"] .horizon{background-color:var(--bg)}
@@ -426,3 +426,17 @@ html[data-theme="paper"] .cb{background:var(--s2)}
 .stplay.active{box-shadow:0 0 0 5px var(--accent-soft)}
 html[data-theme="paper"] .stplay{background:var(--line);color:var(--accent)}
 .ststop{width:30px;height:30px;border-radius:99px;border:var(--border-w) solid var(--line2);color:var(--muted);display:grid;place-items:center;flex:none}
+
+.stlyr{margin-top:auto;display:flex;flex-direction:column;gap:8px;min-height:0}
+.stlyr-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.stlyr-box{flex:1;min-height:120px;max-height:34vh;resize:none;background:var(--bg);border:var(--border-w) solid var(--line);border-radius:12px;padding:12px 14px;font:400 15px/1.65 var(--font-ui);color:var(--text);outline:none;overflow-y:auto}
+html[data-theme="paper"] .stlyr-box{background:var(--s1)}
+.stlyr-box:focus{border-color:var(--accent-ring)}
+.stlyr-speed{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted)}
+.stlyr-speed input{width:110px;accent-color:var(--accent)}
+html[data-theme="paper"] .stlyr-speed input{accent-color:var(--line)}
+.stlyr-speed output{font:600 11px var(--font-mono);color:var(--accent)}
+.gnode .strip2{overflow-x:auto;scrollbar-width:thin;padding-bottom:3px}
+.cb{background:var(--s1);border-color:var(--line2)}
+html[data-theme="paper"] .cb{background:var(--s2);border-color:var(--line)}
+.cb .n{color:var(--text)}

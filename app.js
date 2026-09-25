@@ -1,7 +1,7 @@
-import { CHORDS, PATTERNS } from './ui.js';
-import { AudioEngine } from './audio-engine.js';
-import { Sequencer } from './sequencer.js';
-import { createInitialState, persist, renderPalette, renderSections, renderTimeline, setupControls, setTransportState, updatePlayhead, applyLanguage, storage, askConfirm, askText, $ } from './ui.js';
+import { CHORDS, PATTERNS } from './ui.js?v=h2-1';
+import { AudioEngine } from './audio-engine.js?v=h2-1';
+import { Sequencer } from './sequencer.js?v=h2-1';
+import { createInitialState, persist, renderPalette, renderSections, renderTimeline, setupControls, setTransportState, updatePlayhead, applyLanguage, storage, askConfirm, askText, $ } from './ui.js?v=h2-1';
 
 const state = createInitialState();
 const CLOUD_URL = 'https://script.google.com/macros/s/AKfycbzoNGnjZD05oRdKJJCqSOUEMy31uibqpCdI_OExG-B8iWRDFtFHCEkDkGTsR_HSKzo/exec';

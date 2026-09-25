@@ -161,7 +161,13 @@
       <aside class="rail">
         <span class="lbl">Дальше по карте</span>
         <div id="st-next"></div>
-        <div class="lyr" id="st-lyr"></div>
+        <div class="stlyr">
+          <div class="stlyr-head"><span class="lbl">Текст песни</span>
+            <label class="toggle small"><input id="st-autoscroll" type="checkbox"><span></span> автоскролл</label>
+          </div>
+          <textarea id="st-lyrics" class="stlyr-box" readonly spellcheck="false" placeholder="Текст появится из раздела «Текст песни»"></textarea>
+          <label class="stlyr-speed">Скорость <input id="st-speed" type="range" min="1" max="5" value="2"><output id="st-speed-value">2</output></label>
+        </div>
       </aside>
     </div>
     <div class="horizon" id="st-horizon">
