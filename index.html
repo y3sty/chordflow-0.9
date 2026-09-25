@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="ru" data-theme="scene">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Chordflow 0.9 — конструктор боя</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;600&family=Unbounded:wght@700;800&family=Golos+Text:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <span class="logo" aria-hidden="true">
+          <svg width="17" height="17" viewBox="0 0 17 17"><circle cx="8.5" cy="8.5" r="4.4" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M1.6 5.4h13.8M1.6 8.5h13.8M1.6 11.6h13.8" stroke="currentColor" stroke-width="1.1" opacity=".55"/></svg>
+        </span>
+        <div class="brand-text">
+          <h1>Chordflow</h1>
+          <p class="tag">конструктор аккордов и боя</p>
+        </div>
+      </div>
+      <span class="song-name" id="song-name" title="Название мелодии"><span class="dot"></span><span id="song-name-text">Моя мелодия</span></span>
+      <div class="spacer"></div>
+      <div class="save-wrap">
+        <button id="save-menu-toggle" class="chipbtn save" aria-haspopup="true" aria-expanded="false">
+          <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M7 9V2m0 0L4.6 4.4M7 2l2.4 2.4M2.2 8.6v2.2c0 .7.5 1.2 1.2 1.2h7.2c.7 0 1.2-.5 1.2-1.2V8.6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+          <span>Сохранить</span>
+        </button>
+        <div id="save-menu" class="popover" hidden>
+          <div class="pop-sec">
+            <span class="eyebrow">Файл</span>
+            <div class="pop-row">
+              <button id="save-song" class="chipbtn">↓ Сохранить файл</button>
+              <button id="open-song" class="chipbtn">↑ Открыть файл</button>
+              <input id="song-file" type="file" accept="application/json,.json" hidden>
+            </div>
+          </div>
+          <div class="pop-sec">
+            <span class="eyebrow">Облако · код песни</span>
+            <div class="pop-row">
+              <input id="cloud-code" inputmode="numeric" maxlength="12" placeholder="123456" aria-label="Код песни">
+              <button id="cloud-save" class="chipbtn">☁ Сохранить</button>
+              <button id="cloud-load" class="chipbtn">☁ Открыть</button>
+            </div>
+            <span id="cloud-status" class="cloud-status"></span>
+          </div>
+          <div class="pop-sec">
+            <span class="eyebrow">Настройки</span>
+            <label class="toggle"><input id="mute-strikes" type="checkbox"><span></span> Глушение в «шестёрке»</label>
+            <label class="toggle"><input id="show-song-structure" type="checkbox"><span></span> Показывать структуру песни</label>
+          </div>
+        </div>
+      </div>
+      <button id="lyrics-open" class="chipbtn">
+        <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M5.4 11.6a3 3 0 0 1-3-3V4.2M8.6 2.4a3 3 0 0 1 3 3v4.4M2.4 6.6h3M8.6 7.4h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        <span>Текст песни</span>
+      </button>
+      <button id="theme-toggle" class="iconbtn" title="Переключить тему" aria-label="Переключить тему">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="6.2" stroke="currentColor" stroke-width="1.3"/><path d="M8 1.8a6.2 6.2 0 0 1 0 12.4Z" fill="currentColor"/></svg>
+      </button>
+      <button id="language-toggle" class="iconbtn lang" title="Язык">Čeština</button>
+      <span id="audio-status" class="visually-hidden" aria-live="polite"></span>
+    </header>
+
+    <section class="playbar" aria-label="Воспроизведение">
+      <button id="play" class="play" aria-label="Играть"></button>
+      <button id="stop" class="stop" aria-label="Стоп">
+        <svg width="11" height="11" viewBox="0 0 11 11" aria-hidden="true"><rect x="1.5" y="1.5" width="8" height="8" rx="1.6" fill="currentColor"/></svg>
+      </button>
+      <span class="vr" aria-hidden="true"></span>
+      <div id="pattern-seg" class="seg" role="radiogroup" aria-label="Бой"></div>
+      <span class="vr" aria-hidden="true"></span>
+      <div class="tempo">
+        <span class="lbl">Темп</span>
+        <span id="bpm-value" class="val">90</span>
+        <span class="bpm">BPM</span>
+        <input id="bpm" type="range" min="40" max="200" aria-label="Темп">
+        <span class="stepper"><button id="bpm-minus" aria-label="Медленнее">−</button><button id="bpm-plus" aria-label="Быстрее">+</button></span>
+      </div>
+      <label class="pill loop-pill"><input id="loop" type="checkbox"><span class="sw"></span> Зациклить</label>
+      <span class="bg-group">
+        <button id="background-play" class="pill" title="Собрать песню для фонового воспроизведения">♫ Играть в фоне</button>
+        <select id="bg-duration-select" class="mini-select" title="Длительность фонового трека" aria-label="Длительность фонового трека">
+          <option value="60" selected>1 мин</option><option value="180">3 мин</option><option value="300">5 мин</option><option value="600">10 мин</option>
+        </select>
+      </span>
+      <div class="readout">
+        <span class="beats" id="beat-dots" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+        <span id="current-position" class="pos">Готово к игре</span>
+      </div>
+    </section>
+
+    <section id="section-switcher" class="arrange" aria-label="Порядок песни">
+      <span class="lbl">Порядок песни</span>
+      <div id="section-tabs" class="hidden"></div>
+      <div id="song-order" class="chips"></div>
+    </section>
+
+    <main class="main">
+      <aside class="panel palette-panel" aria-label="Библиотека аккордов">
+        <div class="phead">
+          <div><span class="eyebrow">Библиотека</span>
+            <h2>Аккорды</h2>
+          </div>
+          <span class="count" id="chord-count">26</span>
+        </div>
+        <label class="search">
+          <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><circle cx="6.2" cy="6.2" r="4.4" stroke="currentColor" stroke-width="1.4"/><path d="m9.6 9.6 2.6 2.6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+          <input id="chord-search" type="search" placeholder="Поиск: Am, Cmaj7…" aria-label="Поиск аккорда">
+        </label>
+        <div id="palette" class="palette"></div>
+      </aside>
+
+      <section class="canvas" aria-label="Аранжировка">
+        <div class="chead">
+          <div class="t"><span class="eyebrow">Аранжировка</span>
+            <h2>Карта песни</h2>
+          </div>
+          <div class="timeline-tools">
+            <button id="duplicate-all" class="tool">⧉ Дублировать все</button>
+            <button id="clear-section" class="tool danger">⌫ Стереть часть</button>
+            <button id="clear-all" class="tool danger">⌦ Очистить всё</button>
+            <span class="legend"><span><i class="lg-down"></i> вниз</span><span><i class="lg-up"></i> вверх</span><span><i class="lg-mute"></i> глушение</span></span>
+          </div>
+        </div>
+        <div id="timeline" class="lanes"></div>
+        <div class="timeline-footer"><span>Каждый блок = один такт боя × заданное число тактов</span></div>
+      </section>
+    </main>
+
+    <footer>
+      <span>Web Audio · без сервера · данные сохраняются в браузере</span>
+      <span class="v">Chordflow 0.9</span>
+    </footer>
+  </main>
+
+  <section id="lyrics-overlay" class="lyrics-overlay" hidden>
+    <div class="lyrics-window" role="dialog" aria-modal="true" aria-labelledby="lyrics-title">
+      <header class="lyrics-header">
+        <div><span class="eyebrow">Chordflow</span>
+          <h2 id="lyrics-title">Текст песни</h2>
+        </div>
+        <button id="lyrics-close" class="lyrics-close" aria-label="Закрыть окно">×</button>
+      </header>
+      <textarea id="lyrics-text" class="lyrics-text" spellcheck="false" placeholder="Вставьте или напишите текст песни…"></textarea>
+      <div class="lyrics-controls">
+        <button id="lyrics-save-cloud" class="chipbtn">☁ Сохранить текст в таблицу</button>
+        <span id="lyrics-cloud-status" class="cloud-status"></span>
+        <label class="toggle"><input id="lyrics-autoscroll" type="checkbox"><span></span> Автоскролл</label>
+        <label class="lyrics-speed">Скорость
+          <input id="lyrics-speed" type="range" min="1" max="5" value="2"><output id="lyrics-speed-value">2</output>
+        </label>
+        <span class="lyrics-hint">Текст сохраняется в браузере автоматически</span>
+      </div>
+    </div>
+  </section>
+
+  <audio id="background-audio" preload="auto" playsinline aria-label="Фоновое воспроизведение"></audio>
+  <script type="module" src="app.js"></script>
+</body>
+
+</html>
