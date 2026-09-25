@@ -1,5 +1,5 @@
-import { CHORDS, MAIN_CHORDS, ADDITIONAL_CHORDS, STRING_NAMES } from './chords-data.js';
-import { PATTERNS } from './patterns-data.js';
+import { CHORDS, MAIN_CHORDS, ADDITIONAL_CHORDS, STRING_NAMES } from './chords-data.js?v=chords-2';
+import { PATTERNS } from './patterns-data.js?v=eighth-10';
 
 const $ = selector => document.querySelector(selector);
 const appKey = 'guitar-constructor-session-v1';
@@ -16,7 +16,7 @@ let draggedId = null;
 let uiWired = false;
 
 const LANGUAGE_PAIRS = [
-  ['Chordflow 0.9 — конструктор боя', 'Chordflow 0.9 — konstruktér rytmu'],
+  ['Chordflow — конструктор боя', 'Chordflow — konstruktér rytmu'],
   ['конструктор аккордов и боя', 'konstruktér akordů a rytmu'],
   ['аудио готово', 'audio připraveno'],
   ['Загрузка стальной гитары…', 'Načítání ocelové kytary…'],
@@ -79,6 +79,18 @@ const LANGUAGE_PAIRS = [
   ['Припев', 'Refrén'],
   ['Бридж', 'Bridge'],
   ['Моя мелодия', 'Moje melodie'],
+  ['Дальше по карте', 'Dál po mapě'],
+  ['Карта песни', 'Mapa písně'],
+  ['фокус-сцена', 'fokus-scéna'],
+  ['конструктор', 'konstruktér'],
+  ['Сцена', 'Scéna'],
+  ['сейчас', 'nyní'],
+  ['+ добавить часть — карта песни соберётся здесь', '+ přidejte část — mapa písně se sestaví zde'],
+  ['заполнена одна часть — карта свернулась в семечко', 'je vyplněna jedna část — mapa se sbalila do semínka'],
+  ['вторая часть появилась — карта выросла: узлы, рёбра, повторы', 'objevila se druhá část — mapa vyrostla: uzly, hrany, opakování'],
+  ['песня собрана — виден весь обход с петлёй цикла', 'píseň je hotová — vidíte celý průchod se smyčkou'],
+  ['Пусто · добавьте аккорды в конструкторе', 'Prázdné · přidejte akordy v konstruktéru'],
+  ['Текст песни · автоскролл в разделе «Текст»', 'Text písně · automatické posouvání v záložce «Text»'],
 ];
 
 export function applyLanguage(language = 'ru') {
@@ -90,7 +102,7 @@ export function applyLanguage(language = 'ru') {
   document.querySelectorAll('[title], [aria-label]').forEach(element => { if (element.title) element.title = replaceText(element.title); if (element.getAttribute('aria-label')) element.setAttribute('aria-label', replaceText(element.getAttribute('aria-label'))); });
   const toggle = $('#language-toggle'); if (toggle) toggle.textContent = language === 'ru' ? 'Čeština' : 'Русский';
   document.documentElement.lang = language === 'cs' ? 'cs' : 'ru';
-  document.title = language === 'cs' ? 'Chordflow 0.9 — konstruktér rytmu' : 'Chordflow 0.9 — конструктор боя';
+  document.title = language === 'cs' ? 'Chordflow — konstruktér rytmu' : 'Chordflow — конструктор боя';
 }
 
 /* ---------- svg helpers ---------- */
@@ -189,7 +201,10 @@ export function renderSections(state, handlers) {
 }
 
 /* ---------- song map (lanes) ---------- */
+let currentState = null;
+
 export function renderTimeline(state, handlers) {
+  currentState = state;
   const timeline = $('#timeline');
   const orderCount = id => state.songOrder.filter(x => x === id).length;
   const isVosmyorka = state.pattern.id === 'vosmyorka';
@@ -251,6 +266,7 @@ export function renderTimeline(state, handlers) {
   $('#clear-section').textContent = `⌫ Стереть ${currentSection.name.toLowerCase()}`;
   $('#clear-section').onclick = handlers.clearSection;
   $('#clear-all').onclick = handlers.clearAll;
+  applyView(state);
 }
 
 /* ---------- transport & controls ---------- */
@@ -301,6 +317,14 @@ export function setupControls(state, handlers) {
       document.documentElement.dataset.theme = next;
       storage.set(themeKey, next);
     });
+    $('#st-play').addEventListener('click', () => $('#play').click());
+    $('#st-stop').addEventListener('click', () => $('#stop').click());
+    $('#to-stage').addEventListener('click', () => setView('stage'));
+    $('#to-constructor').addEventListener('click', () => setView('constructor'));
+    $('#focus-toggle').addEventListener('click', () => {
+      const on = document.documentElement.dataset.focus === 'on';
+      document.documentElement.dataset.focus = on ? 'off' : 'on';
+    });
     /* save popover */
     const menu = $('#save-menu'), toggle = $('#save-menu-toggle');
     const closeMenu = () => { menu.hidden = true; toggle.setAttribute('aria-expanded', 'false'); };
@@ -315,6 +339,8 @@ export function setTransportState(running) {
   play.classList.toggle('active', running);
   play.innerHTML = running ? PAUSE_SVG : PLAY_SVG;
   play.setAttribute('aria-label', running ? 'Пауза' : 'Играть');
+  const stPlay = $('#st-play');
+  if (stPlay) { stPlay.classList.toggle('active', running); stPlay.innerHTML = running ? PAUSE_SVG : PLAY_SVG; stPlay.setAttribute('aria-label', running ? 'Пауза' : 'Играть'); }
   document.body.classList.toggle('playing', running);
 }
 
@@ -336,6 +362,7 @@ export function updatePlayhead(item, step, visibleSectionId) {
     }
   });
   $('#current-position').textContent = item ? `${item.sectionName} · такт ${item.localIndex + 1} · удар ${(step % 8) + 1}` : 'Готово к игре';
+  updateStagePlayhead(item, step);
 }
 
 /* ---------- in-app dialogs (работают даже там, где нативные prompt/confirm заблокированы) ---------- */
@@ -380,6 +407,107 @@ export function askText({ title = '', label = '', value = '', confirm = 'Сох�
     host.querySelector('.cf-overlay').addEventListener('click', e => { if (e.target === e.currentTarget) close(null); });
     input.focus(); input.select();
   });
+}
+
+/* ---------- hybrid mode: scene + growing canvas (G1+G3) ---------- */
+const viewKey = 'chordflow-view-v1';
+const filledSections = state => state.sections.filter(sec => sec.sequence.length > 0);
+function orderSequence(state) {
+  return state.songOrder.flatMap(id => {
+    const sec = state.sections.find(x => x.id === id);
+    return (sec?.sequence || []).map((item, i) => ({ ...item, sectionId: id, sectionName: sec.name, localIndex: i }));
+  });
+}
+const stArrow = (stroke, small) => {
+  const w = small ? 6 : 24, h = small ? 12 : 42, sw = small ? 0 : 1.4;
+  if (!stroke.sound) return `<svg class="ar mute" width="${w}" height="${h}" viewBox="0 0 11 20"><path d="M2.6 6.4 8.4 12.6M8.4 6.4 2.6 12.6" stroke="currentColor" stroke-width="1.8"/></svg>`;
+  return stroke.dir === 'down'
+    ? `<svg class="ar down" width="${w}" height="${h}" viewBox="0 0 11 20"><path d="M5.5 1v11M5.5 18 1.6 11.6h7.8L5.5 18Z" fill="currentColor" stroke="currentColor" stroke-width="${sw}"/></svg>`
+    : `<svg class="ar up" width="${w}" height="${h}" viewBox="0 0 11 20"><path d="M5.5 19V8M5.5 2 1.6 8.4h7.8L5.5 2Z" fill="currentColor" stroke="currentColor" stroke-width="${sw}"/></svg>`;
+};
+
+export function renderStage(state) {
+  const filled = filledSections(state);
+  document.documentElement.dataset.state = String(Math.min(3, Math.max(1, filled.length)));
+  const cur = state.sections.find(sec => sec.id === state.currentSectionId) || state.sections[0];
+  $('#st-song').textContent = state.songName || 'Моя мелодия';
+  $('#st-secs').innerHTML = state.sections.map(sec => `<span class="${sec.sequence.length ? (sec.id === state.currentSectionId ? 'on' : '') : 'empty'}">${sec.name}</span>`).join('');
+  $('#st-bpm').textContent = state.bpm;
+  const seq = cur?.sequence || [];
+  const first = seq[0];
+  $('#st-chord').textContent = first ? first.chord.name : '—';
+  $('#st-bars').innerHTML = first ? `${cur.name} · такт <b>1</b>/${seq.length} · ${state.pattern.name.split('·')[0].trim()}` : 'Пусто · добавьте аккорды в конструкторе';
+  const runway = $('#st-runway');
+  runway.querySelectorAll('.ar').forEach(el => el.remove());
+  runway.insertAdjacentHTML('beforeend', state.pattern.strokes.map(st => stArrow(st, false)).join(''));
+  const order = orderSequence(state);
+  const startIdx = order.findIndex(o => o.sectionId === cur?.id);
+  const next = startIdx >= 0 ? order.slice(startIdx + 1, startIdx + 4) : order.slice(0, 3);
+  $('#st-next').innerHTML = next.length
+    ? next.map((o, i) => `<div class="ncard ${i === 0 ? 'soon' : ''}"><span class="n">${o.chord.name}</span><span class="m">${o.bars} такта</span><span class="from">${o.sectionName.toLowerCase()}</span></div>`).join('')
+    : '<div class="ncard"><span class="m">Добавьте части — и здесь появится «дальше»</span></div>';
+  const lyr = (storage.get('guitar-constructor-lyrics-v1') || '').split('\n').filter(Boolean)[0];
+  $('#st-lyr').innerHTML = lyr ? `<b>${lyr}</b><br><span style="font-size:10.5px">Текст песни · автоскролл в разделе «Текст»</span>` : '';
+  const seed = $('#st-seed'), graph = $('#st-graph');
+  if (filled.length <= 1) {
+    seed.style.display = 'flex'; graph.style.display = 'none';
+    const s0 = filled[0] || cur;
+    seed.innerHTML = `<span class="nchip sec-${(state.sections.indexOf(s0) % 3) + 1}"><i></i><b>${s0.name}</b><span>${s0.sequence.length} аккордов · ×${state.songOrder.filter(x => x === s0.id).length}</span></span><span class="ghost">+ добавить часть — карта песни соберётся здесь</span>`;
+  } else {
+    seed.style.display = 'none'; graph.style.display = 'block';
+    const pos = {}; filled.forEach((sec, i) => { pos[sec.id] = { x: 20 + i * 340, y: filled.length > 2 ? (i % 2 ? 108 : 34) : 44 }; });
+    const W = 298;
+    const tr = {};
+    for (let i = 0; i < state.songOrder.length - 1; i++) {
+      const a = state.songOrder[i], b = state.songOrder[i + 1];
+      if (a !== b && pos[a] && pos[b]) { const k = a + '>' + b; tr[k] = tr[k] || { a, b, n: 0 }; tr[k].n++; }
+    }
+    const edges = Object.values(tr).map((t, idx) => {
+      const pa = pos[t.a], pb = pos[t.b], fwd = pb.x > pa.x;
+      const x1 = fwd ? pa.x + W : pa.x, y1 = pa.y + 40, x2 = fwd ? pb.x : pb.x + W, y2 = pb.y + 40;
+      const my = Math.min(y1, y2) - 30 - idx * 8;
+      const lit = t.a === state.currentSectionId;
+      return `<path d="M${x1} ${y1} C ${(x1 + x2) / 2} ${my}, ${(x1 + x2) / 2} ${my}, ${x2} ${y2}" fill="none" stroke="${lit ? 'var(--accent)' : 'var(--muted)'}" stroke-width="${lit ? 2.2 : 1.4}" ${lit ? '' : 'stroke-dasharray="4 6"'} marker-end="url(#st-${lit ? 'a' : 'm'})"/><text x="${(x1 + x2) / 2 - 8}" y="${my + 12}" fill="${lit ? 'var(--accent)' : 'var(--muted)'}" font-size="11" font-family="JetBrains Mono,monospace">×${t.n}</text>`;
+    }).join('');
+    graph.innerHTML = `<svg class="edges" viewBox="0 0 1392 216" preserveAspectRatio="none"><defs><marker id="st-a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" fill="var(--accent)"/></marker><marker id="st-m" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" fill="var(--muted)"/></marker></defs>${edges}</svg>` +
+      filled.map(sec => {
+        const p = pos[sec.id];
+        return `<section class="gnode sec-${(state.sections.indexOf(sec) % 3) + 1} ${sec.id === state.currentSectionId ? 'play' : ''}" data-section="${sec.id}" style="left:${p.x}px;top:${p.y}px"><div class="h"><i></i><b>${sec.name}</b><span class="m">×${state.songOrder.filter(x => x === sec.id).length} · ${sec.sequence.reduce((a, b) => a + b.bars, 0)} тактов</span></div><div class="strip2">${sec.sequence.slice(0, 5).map((bl, bi) => `<div class="cb" data-ci="${bi}"><div class="n">${bl.chord.name}</div><div class="a">${stArrow(state.pattern.strokes[0], true)}${stArrow(state.pattern.strokes[2] || state.pattern.strokes[0], true)}</div></div>`).join('')}</div></section>`;
+      }).join('');
+  }
+  $('#st-hint').textContent = filled.length <= 1
+    ? 'заполнена одна часть — карта свернулась в семечко'
+    : filled.length === 2 ? 'вторая часть появилась — карта выросла: узлы, рёбра, повторы' : 'песня собрана — виден весь обход с петлёй цикла';
+}
+
+export function updateStagePlayhead(item, step) {
+  if (document.body.dataset.view !== 'stage' || !item) return;
+  $('#st-chord').textContent = item.chord.name;
+  $('#st-bar').textContent = item.localIndex + 1;
+  $('#st-hit').textContent = (step % 8) + 1;
+  document.querySelectorAll('#st-runway .ar').forEach((el, i) => el.classList.toggle('lit', i === step % 8));
+  document.querySelectorAll('#st-beats i').forEach((el, i) => el.classList.toggle('on', i === Math.floor((step % 8) / 2)));
+  document.querySelectorAll('.gnode').forEach(node => {
+    const on = node.dataset.section === item.sectionId;
+    node.classList.toggle('play', on);
+    if (on) node.querySelectorAll('.cb').forEach((c, i) => c.classList.toggle('lit', i === item.localIndex));
+  });
+}
+
+let viewInitialized = false;
+export function applyView(state) {
+  currentState = state;
+  if (!viewInitialized) {
+    viewInitialized = true;
+    const savedView = storage.get(viewKey);
+    document.body.dataset.view = savedView || (filledSections(state).length > 0 ? 'stage' : 'constructor');
+  }
+  if (document.body.dataset.view === 'stage') renderStage(state);
+}
+export function setView(view, state) {
+  storage.set(viewKey, view);
+  document.body.dataset.view = view;
+  if (view === 'stage' && currentState) renderStage(currentState);
 }
 
 export { $, CHORDS, PATTERNS };

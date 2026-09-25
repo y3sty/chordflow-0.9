@@ -4,14 +4,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Chordflow 0.9 — конструктор боя</title>
+  <title>Chordflow — конструктор боя</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;600&family=Unbounded:wght@700;800&family=Golos+Text:wght@400;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=proto-1">
 </head>
 
 <body>
-  <main class="app-shell">
+  <main class="app-shell" id="constructor-view">
     <header class="topbar">
       <div class="brand">
         <span class="logo" aria-hidden="true">
@@ -54,6 +54,7 @@
           </div>
         </div>
       </div>
+      <button id="to-stage" class="chipbtn" title="Сцена-полотно: режим исполнения">⤢ Сцена</button>
       <button id="lyrics-open" class="chipbtn">
         <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M5.4 11.6a3 3 0 0 1-3-3V4.2M8.6 2.4a3 3 0 0 1 3 3v4.4M2.4 6.6h3M8.6 7.4h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
         <span>Текст песни</span>
@@ -133,9 +134,43 @@
 
     <footer>
       <span>Web Audio · без сервера · данные сохраняются в браузере</span>
-      <span class="v">Chordflow 0.9</span>
+      <span class="v">Chordflow · прототип редизайна</span>
     </footer>
   </main>
+
+  <section id="stage-view" aria-label="Сцена">
+    <div class="strip">
+      <button id="st-play" class="stplay" aria-label="Играть"></button>
+      <button id="st-stop" class="ststop" aria-label="Стоп"><svg width="10" height="10" viewBox="0 0 11 11" aria-hidden="true"><rect x="1.5" y="1.5" width="8" height="8" rx="1.6" fill="currentColor"/></svg></button>
+      <span class="song" id="st-song">Моя мелодия</span>
+      <span class="secs" id="st-secs"></span>
+      <span class="right"><b id="st-bpm">90</b> BPM · такт <b id="st-bar">–</b>/8 · удар <b id="st-hit">–</b>/8</span>
+      <button class="mbtn" id="focus-toggle" title="Скрыть карту песни">⤢ фокус-сцена</button>
+      <button class="mbtn" id="to-constructor">⚙ конструктор</button>
+    </div>
+    <div class="stagegrid">
+      <div class="nownow">
+        <div class="chordnow">
+          <div class="lbl">сейчас</div>
+          <h1 id="st-chord">—</h1>
+          <div class="bars" id="st-bars"></div>
+        </div>
+        <div class="runway" id="st-runway"><span class="sweep" aria-hidden="true"></span></div>
+        <div class="beats" id="st-beats" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+      </div>
+      <aside class="rail">
+        <span class="lbl">Дальше по карте</span>
+        <div id="st-next"></div>
+        <div class="lyr" id="st-lyr"></div>
+      </aside>
+    </div>
+    <div class="horizon" id="st-horizon">
+      <span class="hlabel">Карта песни</span>
+      <span class="hhint" id="st-hint"></span>
+      <div class="seed" id="st-seed"></div>
+      <div class="hgraph" id="st-graph"></div>
+    </div>
+  </section>
 
   <section id="lyrics-overlay" class="lyrics-overlay" hidden>
     <div class="lyrics-window" role="dialog" aria-modal="true" aria-labelledby="lyrics-title">
@@ -159,7 +194,7 @@
   </section>
 
   <audio id="background-audio" preload="auto" playsinline aria-label="Фоновое воспроизведение"></audio>
-  <script type="module" src="app.js"></script>
+  <script type="module" src="app.js?v=proto-1"></script>
 </body>
 
 </html>

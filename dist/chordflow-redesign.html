@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Chordflow 0.9 — конструктор боя</title>
+  <title>Chordflow — конструктор боя</title>
   <style>
 /* Chordflow · прототип редизайна · одна система, две темы */
 /*Tokens: scene = концепт A «Сцена», paper = концепт B «Бумага» */
@@ -357,6 +357,84 @@ html[data-theme="paper"] .cf-confirm{background:var(--line);color:#fff;border-co
 html[data-theme="paper"] .cf-confirm:hover{background:var(--line);color:var(--accent)}
 .cf-confirm.danger{color:var(--danger);border-color:var(--danger);background:transparent}
 
+/* ========== hybrid mode: scene + growing canvas (G1+G3) ========== */
+body[data-view="stage"] #constructor-view{display:none}
+body[data-view="constructor"] #stage-view{display:none}
+html[data-state="1"]{--hh:104px} html[data-state="2"]{--hh:216px} html[data-state="3"]{--hh:264px}
+html[data-focus="on"] .horizon{display:none}
+#stage-view{display:flex;flex-direction:column;height:100vh}
+.strip{height:54px;flex:none;display:flex;align-items:center;gap:14px;padding:0 24px;border-bottom:var(--border-w) solid var(--line)}
+.strip .song{font-weight:800;font-size:14px;letter-spacing:-.01em}
+.strip .secs{display:flex;gap:6px}
+.strip .secs span{font-size:11px;font-weight:700;color:var(--muted);border:var(--border-w) solid var(--line);border-radius:99px;padding:5px 11px}
+.strip .secs span.on{color:var(--accent);border-color:var(--accent)}
+.strip .secs span.empty{opacity:.45;border-style:dashed}
+.strip .right{margin-left:auto;display:flex;align-items:center;gap:10px;font:600 12px var(--font-mono);color:var(--muted)}
+.strip .right b{color:var(--text);font-size:15px}
+.mbtn{border:var(--border-w) solid var(--line);border-radius:99px;padding:7px 13px;font-size:11px;font-weight:700;color:var(--muted);background:var(--s1)}
+.mbtn:hover{color:var(--text)}
+.stagegrid{flex:1;min-height:0;display:grid;grid-template-columns:1fr 280px}
+.nownow{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4.5vh;position:relative;min-width:0}
+.nownow:before{content:"";position:absolute;inset:0;background:radial-gradient(58% 44% at 50% 42%, var(--accent-soft), transparent 70%)}
+.chordnow{text-align:center;position:relative}
+.chordnow .lbl{font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.chordnow h1{font-family:var(--font-disp);font-weight:800;font-size:clamp(90px,21vh,190px);line-height:.95;letter-spacing:-.06em;margin:6px 0 0}
+.chordnow .bars{font:600 12px var(--font-mono);color:var(--muted);margin-top:8px}
+.chordnow .bars b{color:var(--accent)}
+html[data-theme="paper"] .chordnow .bars b{color:var(--sec2)}
+.runway{position:relative;width:min(700px,62vw);height:74px;border:var(--border-w) solid var(--line);border-radius:18px;display:flex;align-items:center;justify-content:space-between;padding:0 30px;background:color-mix(in srgb, var(--s1) 55%, transparent)}
+.runway .sweep{position:absolute;left:36%;top:-12px;bottom:-12px;width:2px;background:var(--accent);box-shadow:0 0 20px var(--accent)}
+.runway .ar{opacity:.32}
+.runway .ar.lit{opacity:1;transform:scale(1.3);filter:drop-shadow(0 0 10px var(--accent))}
+html[data-theme="paper"] .runway .ar.lit{filter:none}
+.rail{border-left:var(--border-w) solid var(--line);background:var(--s1);padding:18px 16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+html[data-theme="paper"] .rail{background:var(--bg)}
+.rail .lbl{font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.ncard{border:var(--border-w) solid var(--line);border-radius:14px;padding:11px 13px;display:flex;align-items:center;gap:12px;background:var(--bg)}
+html[data-theme="paper"] .ncard{background:var(--s1)}
+.ncard .n{font-family:var(--font-disp);font-weight:800;font-size:24px;letter-spacing:-.04em}
+.ncard .m{font:600 9.5px var(--font-mono);color:var(--muted)}
+.ncard.soon{border-color:var(--accent)}
+.ncard .from{margin-left:auto;font-size:9px;font-weight:700;color:var(--muted);border:var(--border-w) solid var(--line);border-radius:99px;padding:3px 8px;white-space:nowrap}
+.rail .lyr{margin-top:auto;border-top:var(--border-w) solid var(--line);padding-top:12px;font-size:13.5px;line-height:1.65;color:var(--muted);font-style:italic}
+.rail .lyr b{color:var(--text);font-style:normal}
+.horizon{flex:none;height:var(--hh);border-top:var(--border-w) solid var(--line);background:var(--s1);position:relative;overflow:hidden;background-image:radial-gradient(var(--line) 1px, transparent 1.4px);background-size:24px 24px;transition:height .25s ease-out}
+html[data-theme="paper"] .horizon{background-color:var(--bg)}
+.hlabel{position:absolute;top:10px;left:24px;font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);font-weight:700;z-index:2}
+.hhint{position:absolute;top:10px;right:24px;font-size:10.5px;color:var(--muted);font-style:italic;z-index:2}
+.seed{position:absolute;left:24px;bottom:18px;display:flex;align-items:center;gap:10px}
+.nchip{display:flex;align-items:center;gap:9px;border:var(--border-w) solid var(--accent);border-radius:14px;background:var(--s2);padding:10px 16px;box-shadow:0 0 0 3px var(--accent-soft)}
+.nchip i{width:9px;height:9px;border-radius:3px;background:var(--sec1)}
+.nchip b{font-size:13px;font-weight:800}
+.nchip span{font:600 10px var(--font-mono);color:var(--muted)}
+.ghost{border:var(--border-w) dashed var(--line2);border-radius:14px;padding:10px 16px;color:var(--muted);font-size:12px;font-weight:700}
+.hgraph{position:absolute;inset:34px 24px 14px}
+.hgraph svg.edges{position:absolute;inset:0;width:100%;height:100%}
+.gnode{position:absolute;width:298px;background:var(--s2);border:var(--border-w) solid var(--line2);border-radius:16px;padding:11px 12px 9px}
+html[data-theme="paper"] .gnode{background:var(--s1);border-color:var(--line)}
+.gnode .h{display:flex;align-items:center;gap:8px}
+.gnode .h i{width:9px;height:9px;border-radius:3px;background:var(--sec,var(--faint))}
+.gnode .h b{font-family:var(--font-disp);font-weight:800;font-size:13.5px;letter-spacing:-.02em}
+.gnode .h .m{font:600 9.5px var(--font-mono);color:var(--muted)}
+.gnode .strip2{display:flex;gap:5px;margin-top:8px}
+.cb{flex:none;width:46px;border:var(--border-w) solid var(--line);border-radius:8px;background:var(--bg);padding:4px 3px 3px;text-align:center}
+html[data-theme="paper"] .cb{background:var(--s2)}
+.cb .n{font-weight:800;font-size:12.5px}
+.cb .a{display:flex;gap:1.5px;justify-content:center;height:10px;align-items:flex-end;margin-top:3px}
+.cb .a .ar{width:6px;height:12px}
+.cb.lit{border-color:var(--accent);background:var(--accent-soft)}
+.gnode.play{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft),0 0 34px var(--accent-ring)}
+@media (max-width:900px){
+  .stagegrid{grid-template-columns:1fr}
+  .rail{display:none}
+  .runway{width:88vw}
+}
+
+.stplay{width:38px;height:38px;border-radius:99px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;flex:none}
+.stplay.active{box-shadow:0 0 0 5px var(--accent-soft)}
+html[data-theme="paper"] .stplay{background:var(--line);color:var(--accent)}
+.ststop{width:30px;height:30px;border-radius:99px;border:var(--border-w) solid var(--line2);color:var(--muted);display:grid;place-items:center;flex:none}
+
 </style>
 <style>
 /* Вшитые шрифты: Inter, JetBrains Mono, Unbounded, Golos Text (cyrillic+latin) */
@@ -382,7 +460,7 @@ html[data-theme="paper"] .cf-confirm:hover{background:var(--line);color:var(--ac
 </head>
 
 <body>
-  <main class="app-shell">
+  <main class="app-shell" id="constructor-view">
     <header class="topbar">
       <div class="brand">
         <span class="logo" aria-hidden="true">
@@ -425,6 +503,7 @@ html[data-theme="paper"] .cf-confirm:hover{background:var(--line);color:var(--ac
           </div>
         </div>
       </div>
+      <button id="to-stage" class="chipbtn" title="Сцена-полотно: режим исполнения">⤢ Сцена</button>
       <button id="lyrics-open" class="chipbtn">
         <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M5.4 11.6a3 3 0 0 1-3-3V4.2M8.6 2.4a3 3 0 0 1 3 3v4.4M2.4 6.6h3M8.6 7.4h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
         <span>Текст песни</span>
@@ -504,9 +583,43 @@ html[data-theme="paper"] .cf-confirm:hover{background:var(--line);color:var(--ac
 
     <footer>
       <span>Web Audio · без сервера · данные сохраняются в браузере</span>
-      <span class="v">Chordflow 0.9</span>
+      <span class="v">Chordflow · прототип редизайна</span>
     </footer>
   </main>
+
+  <section id="stage-view" aria-label="Сцена">
+    <div class="strip">
+      <button id="st-play" class="stplay" aria-label="Играть"></button>
+      <button id="st-stop" class="ststop" aria-label="Стоп"><svg width="10" height="10" viewBox="0 0 11 11" aria-hidden="true"><rect x="1.5" y="1.5" width="8" height="8" rx="1.6" fill="currentColor"/></svg></button>
+      <span class="song" id="st-song">Моя мелодия</span>
+      <span class="secs" id="st-secs"></span>
+      <span class="right"><b id="st-bpm">90</b> BPM · такт <b id="st-bar">–</b>/8 · удар <b id="st-hit">–</b>/8</span>
+      <button class="mbtn" id="focus-toggle" title="Скрыть карту песни">⤢ фокус-сцена</button>
+      <button class="mbtn" id="to-constructor">⚙ конструктор</button>
+    </div>
+    <div class="stagegrid">
+      <div class="nownow">
+        <div class="chordnow">
+          <div class="lbl">сейчас</div>
+          <h1 id="st-chord">—</h1>
+          <div class="bars" id="st-bars"></div>
+        </div>
+        <div class="runway" id="st-runway"><span class="sweep" aria-hidden="true"></span></div>
+        <div class="beats" id="st-beats" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+      </div>
+      <aside class="rail">
+        <span class="lbl">Дальше по карте</span>
+        <div id="st-next"></div>
+        <div class="lyr" id="st-lyr"></div>
+      </aside>
+    </div>
+    <div class="horizon" id="st-horizon">
+      <span class="hlabel">Карта песни</span>
+      <span class="hhint" id="st-hint"></span>
+      <div class="seed" id="st-seed"></div>
+      <div class="hgraph" id="st-graph"></div>
+    </div>
+  </section>
 
   <section id="lyrics-overlay" class="lyrics-overlay" hidden>
     <div class="lyrics-window" role="dialog" aria-modal="true" aria-labelledby="lyrics-title">
@@ -1049,7 +1162,7 @@ let draggedId = null;
 let uiWired = false;
 
 const LANGUAGE_PAIRS = [
-  ['Chordflow 0.9 — конструктор боя', 'Chordflow 0.9 — konstruktér rytmu'],
+  ['Chordflow — конструктор боя', 'Chordflow — konstruktér rytmu'],
   ['конструктор аккордов и боя', 'konstruktér akordů a rytmu'],
   ['аудио готово', 'audio připraveno'],
   ['Загрузка стальной гитары…', 'Načítání ocelové kytary…'],
@@ -1112,6 +1225,18 @@ const LANGUAGE_PAIRS = [
   ['Припев', 'Refrén'],
   ['Бридж', 'Bridge'],
   ['Моя мелодия', 'Moje melodie'],
+  ['Дальше по карте', 'Dál po mapě'],
+  ['Карта песни', 'Mapa písně'],
+  ['фокус-сцена', 'fokus-scéna'],
+  ['конструктор', 'konstruktér'],
+  ['Сцена', 'Scéna'],
+  ['сейчас', 'nyní'],
+  ['+ добавить часть — карта песни соберётся здесь', '+ přidejte část — mapa písně se sestaví zde'],
+  ['заполнена одна часть — карта свернулась в семечко', 'je vyplněna jedna část — mapa se sbalila do semínka'],
+  ['вторая часть появилась — карта выросла: узлы, рёбра, повторы', 'objevila se druhá část — mapa vyrostla: uzly, hrany, opakování'],
+  ['песня собрана — виден весь обход с петлёй цикла', 'píseň je hotová — vidíte celý průchod se smyčkou'],
+  ['Пусто · добавьте аккорды в конструкторе', 'Prázdné · přidejte akordy v konstruktéru'],
+  ['Текст песни · автоскролл в разделе «Текст»', 'Text písně · automatické posouvání v záložce «Text»'],
 ];
 
 function applyLanguage(language = 'ru') {
@@ -1123,7 +1248,7 @@ function applyLanguage(language = 'ru') {
   document.querySelectorAll('[title], [aria-label]').forEach(element => { if (element.title) element.title = replaceText(element.title); if (element.getAttribute('aria-label')) element.setAttribute('aria-label', replaceText(element.getAttribute('aria-label'))); });
   const toggle = $('#language-toggle'); if (toggle) toggle.textContent = language === 'ru' ? 'Čeština' : 'Русский';
   document.documentElement.lang = language === 'cs' ? 'cs' : 'ru';
-  document.title = language === 'cs' ? 'Chordflow 0.9 — konstruktér rytmu' : 'Chordflow 0.9 — конструктор боя';
+  document.title = language === 'cs' ? 'Chordflow — konstruktér rytmu' : 'Chordflow — конструктор боя';
 }
 
 /* ---------- svg helpers ---------- */
@@ -1222,7 +1347,10 @@ function renderSections(state, handlers) {
 }
 
 /* ---------- song map (lanes) ---------- */
+let currentState = null;
+
 function renderTimeline(state, handlers) {
+  currentState = state;
   const timeline = $('#timeline');
   const orderCount = id => state.songOrder.filter(x => x === id).length;
   const isVosmyorka = state.pattern.id === 'vosmyorka';
@@ -1284,6 +1412,7 @@ function renderTimeline(state, handlers) {
   $('#clear-section').textContent = `⌫ Стереть ${currentSection.name.toLowerCase()}`;
   $('#clear-section').onclick = handlers.clearSection;
   $('#clear-all').onclick = handlers.clearAll;
+  applyView(state);
 }
 
 /* ---------- transport & controls ---------- */
@@ -1334,6 +1463,14 @@ function setupControls(state, handlers) {
       document.documentElement.dataset.theme = next;
       storage.set(themeKey, next);
     });
+    $('#st-play').addEventListener('click', () => $('#play').click());
+    $('#st-stop').addEventListener('click', () => $('#stop').click());
+    $('#to-stage').addEventListener('click', () => setView('stage'));
+    $('#to-constructor').addEventListener('click', () => setView('constructor'));
+    $('#focus-toggle').addEventListener('click', () => {
+      const on = document.documentElement.dataset.focus === 'on';
+      document.documentElement.dataset.focus = on ? 'off' : 'on';
+    });
     /* save popover */
     const menu = $('#save-menu'), toggle = $('#save-menu-toggle');
     const closeMenu = () => { menu.hidden = true; toggle.setAttribute('aria-expanded', 'false'); };
@@ -1348,6 +1485,8 @@ function setTransportState(running) {
   play.classList.toggle('active', running);
   play.innerHTML = running ? PAUSE_SVG : PLAY_SVG;
   play.setAttribute('aria-label', running ? 'Пауза' : 'Играть');
+  const stPlay = $('#st-play');
+  if (stPlay) { stPlay.classList.toggle('active', running); stPlay.innerHTML = running ? PAUSE_SVG : PLAY_SVG; stPlay.setAttribute('aria-label', running ? 'Пауза' : 'Играть'); }
   document.body.classList.toggle('playing', running);
 }
 
@@ -1369,6 +1508,7 @@ function updatePlayhead(item, step, visibleSectionId) {
     }
   });
   $('#current-position').textContent = item ? `${item.sectionName} · такт ${item.localIndex + 1} · удар ${(step % 8) + 1}` : 'Готово к игре';
+  updateStagePlayhead(item, step);
 }
 
 /* ---------- in-app dialogs (работают даже там, где нативные prompt/confirm заблокированы) ---------- */
@@ -1413,6 +1553,107 @@ function askText({ title = '', label = '', value = '', confirm = 'Сохрани
     host.querySelector('.cf-overlay').addEventListener('click', e => { if (e.target === e.currentTarget) close(null); });
     input.focus(); input.select();
   });
+}
+
+/* ---------- hybrid mode: scene + growing canvas (G1+G3) ---------- */
+const viewKey = 'chordflow-view-v1';
+const filledSections = state => state.sections.filter(sec => sec.sequence.length > 0);
+function orderSequence(state) {
+  return state.songOrder.flatMap(id => {
+    const sec = state.sections.find(x => x.id === id);
+    return (sec?.sequence || []).map((item, i) => ({ ...item, sectionId: id, sectionName: sec.name, localIndex: i }));
+  });
+}
+const stArrow = (stroke, small) => {
+  const w = small ? 6 : 24, h = small ? 12 : 42, sw = small ? 0 : 1.4;
+  if (!stroke.sound) return `<svg class="ar mute" width="${w}" height="${h}" viewBox="0 0 11 20"><path d="M2.6 6.4 8.4 12.6M8.4 6.4 2.6 12.6" stroke="currentColor" stroke-width="1.8"/></svg>`;
+  return stroke.dir === 'down'
+    ? `<svg class="ar down" width="${w}" height="${h}" viewBox="0 0 11 20"><path d="M5.5 1v11M5.5 18 1.6 11.6h7.8L5.5 18Z" fill="currentColor" stroke="currentColor" stroke-width="${sw}"/></svg>`
+    : `<svg class="ar up" width="${w}" height="${h}" viewBox="0 0 11 20"><path d="M5.5 19V8M5.5 2 1.6 8.4h7.8L5.5 2Z" fill="currentColor" stroke="currentColor" stroke-width="${sw}"/></svg>`;
+};
+
+function renderStage(state) {
+  const filled = filledSections(state);
+  document.documentElement.dataset.state = String(Math.min(3, Math.max(1, filled.length)));
+  const cur = state.sections.find(sec => sec.id === state.currentSectionId) || state.sections[0];
+  $('#st-song').textContent = state.songName || 'Моя мелодия';
+  $('#st-secs').innerHTML = state.sections.map(sec => `<span class="${sec.sequence.length ? (sec.id === state.currentSectionId ? 'on' : '') : 'empty'}">${sec.name}</span>`).join('');
+  $('#st-bpm').textContent = state.bpm;
+  const seq = cur?.sequence || [];
+  const first = seq[0];
+  $('#st-chord').textContent = first ? first.chord.name : '—';
+  $('#st-bars').innerHTML = first ? `${cur.name} · такт <b>1</b>/${seq.length} · ${state.pattern.name.split('·')[0].trim()}` : 'Пусто · добавьте аккорды в конструкторе';
+  const runway = $('#st-runway');
+  runway.querySelectorAll('.ar').forEach(el => el.remove());
+  runway.insertAdjacentHTML('beforeend', state.pattern.strokes.map(st => stArrow(st, false)).join(''));
+  const order = orderSequence(state);
+  const startIdx = order.findIndex(o => o.sectionId === cur?.id);
+  const next = startIdx >= 0 ? order.slice(startIdx + 1, startIdx + 4) : order.slice(0, 3);
+  $('#st-next').innerHTML = next.length
+    ? next.map((o, i) => `<div class="ncard ${i === 0 ? 'soon' : ''}"><span class="n">${o.chord.name}</span><span class="m">${o.bars} такта</span><span class="from">${o.sectionName.toLowerCase()}</span></div>`).join('')
+    : '<div class="ncard"><span class="m">Добавьте части — и здесь появится «дальше»</span></div>';
+  const lyr = (storage.get('guitar-constructor-lyrics-v1') || '').split('\n').filter(Boolean)[0];
+  $('#st-lyr').innerHTML = lyr ? `<b>${lyr}</b><br><span style="font-size:10.5px">Текст песни · автоскролл в разделе «Текст»</span>` : '';
+  const seed = $('#st-seed'), graph = $('#st-graph');
+  if (filled.length <= 1) {
+    seed.style.display = 'flex'; graph.style.display = 'none';
+    const s0 = filled[0] || cur;
+    seed.innerHTML = `<span class="nchip sec-${(state.sections.indexOf(s0) % 3) + 1}"><i></i><b>${s0.name}</b><span>${s0.sequence.length} аккордов · ×${state.songOrder.filter(x => x === s0.id).length}</span></span><span class="ghost">+ добавить часть — карта песни соберётся здесь</span>`;
+  } else {
+    seed.style.display = 'none'; graph.style.display = 'block';
+    const pos = {}; filled.forEach((sec, i) => { pos[sec.id] = { x: 20 + i * 340, y: filled.length > 2 ? (i % 2 ? 108 : 34) : 44 }; });
+    const W = 298;
+    const tr = {};
+    for (let i = 0; i < state.songOrder.length - 1; i++) {
+      const a = state.songOrder[i], b = state.songOrder[i + 1];
+      if (a !== b && pos[a] && pos[b]) { const k = a + '>' + b; tr[k] = tr[k] || { a, b, n: 0 }; tr[k].n++; }
+    }
+    const edges = Object.values(tr).map((t, idx) => {
+      const pa = pos[t.a], pb = pos[t.b], fwd = pb.x > pa.x;
+      const x1 = fwd ? pa.x + W : pa.x, y1 = pa.y + 40, x2 = fwd ? pb.x : pb.x + W, y2 = pb.y + 40;
+      const my = Math.min(y1, y2) - 30 - idx * 8;
+      const lit = t.a === state.currentSectionId;
+      return `<path d="M${x1} ${y1} C ${(x1 + x2) / 2} ${my}, ${(x1 + x2) / 2} ${my}, ${x2} ${y2}" fill="none" stroke="${lit ? 'var(--accent)' : 'var(--muted)'}" stroke-width="${lit ? 2.2 : 1.4}" ${lit ? '' : 'stroke-dasharray="4 6"'} marker-end="url(#st-${lit ? 'a' : 'm'})"/><text x="${(x1 + x2) / 2 - 8}" y="${my + 12}" fill="${lit ? 'var(--accent)' : 'var(--muted)'}" font-size="11" font-family="JetBrains Mono,monospace">×${t.n}</text>`;
+    }).join('');
+    graph.innerHTML = `<svg class="edges" viewBox="0 0 1392 216" preserveAspectRatio="none"><defs><marker id="st-a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" fill="var(--accent)"/></marker><marker id="st-m" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" fill="var(--muted)"/></marker></defs>${edges}</svg>` +
+      filled.map(sec => {
+        const p = pos[sec.id];
+        return `<section class="gnode sec-${(state.sections.indexOf(sec) % 3) + 1} ${sec.id === state.currentSectionId ? 'play' : ''}" data-section="${sec.id}" style="left:${p.x}px;top:${p.y}px"><div class="h"><i></i><b>${sec.name}</b><span class="m">×${state.songOrder.filter(x => x === sec.id).length} · ${sec.sequence.reduce((a, b) => a + b.bars, 0)} тактов</span></div><div class="strip2">${sec.sequence.slice(0, 5).map((bl, bi) => `<div class="cb" data-ci="${bi}"><div class="n">${bl.chord.name}</div><div class="a">${stArrow(state.pattern.strokes[0], true)}${stArrow(state.pattern.strokes[2] || state.pattern.strokes[0], true)}</div></div>`).join('')}</div></section>`;
+      }).join('');
+  }
+  $('#st-hint').textContent = filled.length <= 1
+    ? 'заполнена одна часть — карта свернулась в семечко'
+    : filled.length === 2 ? 'вторая часть появилась — карта выросла: узлы, рёбра, повторы' : 'песня собрана — виден весь обход с петлёй цикла';
+}
+
+function updateStagePlayhead(item, step) {
+  if (document.body.dataset.view !== 'stage' || !item) return;
+  $('#st-chord').textContent = item.chord.name;
+  $('#st-bar').textContent = item.localIndex + 1;
+  $('#st-hit').textContent = (step % 8) + 1;
+  document.querySelectorAll('#st-runway .ar').forEach((el, i) => el.classList.toggle('lit', i === step % 8));
+  document.querySelectorAll('#st-beats i').forEach((el, i) => el.classList.toggle('on', i === Math.floor((step % 8) / 2)));
+  document.querySelectorAll('.gnode').forEach(node => {
+    const on = node.dataset.section === item.sectionId;
+    node.classList.toggle('play', on);
+    if (on) node.querySelectorAll('.cb').forEach((c, i) => c.classList.toggle('lit', i === item.localIndex));
+  });
+}
+
+let viewInitialized = false;
+function applyView(state) {
+  currentState = state;
+  if (!viewInitialized) {
+    viewInitialized = true;
+    const savedView = storage.get(viewKey);
+    document.body.dataset.view = savedView || (filledSections(state).length > 0 ? 'stage' : 'constructor');
+  }
+  if (document.body.dataset.view === 'stage') renderStage(state);
+}
+function setView(view, state) {
+  storage.set(viewKey, view);
+  document.body.dataset.view = view;
+  if (view === 'stage' && currentState) renderStage(currentState);
 }
 
 
