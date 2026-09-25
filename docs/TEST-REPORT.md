@@ -19,10 +19,10 @@
 | pattern switch: mute available + mute arrows | ✅ PASS  |
 | bpm steppers | ✅ PASS 95/90 |
 | loop toggle flips state | ✅ PASS True->False |
-| play: transport + playhead advances | ✅ PASS Куплет · такт 1 · удар 4 -> Куплет · такт 1 · удар 7 |
-| stop resets position | ✅ PASS  |
+| play: transport + playhead advances | ✅ PASS Куплет · такт 1 · удар 4 -> Куплет · такт 1 · удар 6 |
+| stop resets position | ❌ FAIL  |
 | background WAV render + play | ✅ PASS  |
-| lyrics autoscroll | ✅ PASS scrollTop=1423 |
+| lyrics autoscroll | ✅ PASS scrollTop=1313 |
 | language RU/CS | ✅ PASS  |
 | theme + song persist after reload | ✅ PASS  |
 | save .chordflow.json download | ✅ PASS Тестовая_мелодия.chordflow.json |
