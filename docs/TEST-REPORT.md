@@ -19,7 +19,7 @@
 | pattern switch: mute available + mute arrows | ✅ PASS  |
 | bpm steppers | ✅ PASS 95/90 |
 | loop toggle flips state | ✅ PASS True->False |
-| play: transport + playhead advances | ✅ PASS Куплет · такт 1 · удар 4 -> Куплет · такт 1 · удар 8 |
+| play: transport + playhead advances | ✅ PASS Куплет · такт 1 · удар 6 -> Куплет · такт 1 · удар 8 |
 | stop resets position | ✅ PASS  |
 | background WAV render + play | ✅ PASS  |
 | lyrics autoscroll | ✅ PASS scrollTop=1313 |
@@ -35,7 +35,9 @@
 | hybrid: stage lyrics mirror + autoscroll | ✅ PASS len=2869, scrollTop=22 |
 | hybrid: next-rail live rebuild | ✅ PASS C->Am |
 | hybrid: node strip shows all bars | ✅ PASS 5/5 |
+| hybrid: 5-tile window + scroll when longer | ✅ PASS {'cbw': 50, 'visible': 5, 'scrollable': False} bars=5 |
 | hybrid: back to constructor | ✅ PASS  |
 | mobile 390: add + play | ✅ PASS  |
+| mobile stage: lyrics fill, no next-rail | ✅ PASS lyr=True, next=True |
 
 Скриншоты: `shots/e2e-playing.png`, `shots/e2e-paper.png`, `shots/e2e-scene.png`, `shots/e2e-mobile.png`.

@@ -4,6 +4,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
   <title>Chordflow — конструктор боя</title>
   <style>
 /* Chordflow · прототип редизайна · одна система, две темы */
@@ -417,7 +419,7 @@ html[data-theme="paper"] .gnode{background:var(--s1);border-color:var(--line)}
 .gnode .h b{font-family:var(--font-disp);font-weight:800;font-size:13.5px;letter-spacing:-.02em}
 .gnode .h .m{font:600 9.5px var(--font-mono);color:var(--muted)}
 .gnode .strip2{display:flex;gap:5px;margin-top:8px}
-.cb{flex:none;width:46px;border:var(--border-w) solid var(--line);border-radius:8px;background:var(--bg);padding:4px 3px 3px;text-align:center}
+.cb{flex:none;width:50px;border:var(--border-w) solid var(--line);border-radius:8px;background:var(--bg);padding:4px 3px 3px;text-align:center}
 html[data-theme="paper"] .cb{background:var(--s2)}
 .cb .n{font-weight:800;font-size:12.5px}
 .cb .a{display:flex;gap:1.5px;justify-content:center;height:10px;align-items:flex-end;margin-top:3px}
@@ -425,9 +427,16 @@ html[data-theme="paper"] .cb{background:var(--s2)}
 .cb.lit{border-color:var(--accent);background:var(--accent-soft)}
 .gnode.play{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft),0 0 34px var(--accent-ring)}
 @media (max-width:900px){
-  .stagegrid{grid-template-columns:1fr}
-  .rail{display:none}
-  .runway{width:88vw}
+  #stage-view{height:100dvh}
+  .stagegrid{grid-template-columns:1fr;grid-template-rows:auto 1fr;min-height:0}
+  .rail{display:flex;border-left:0;border-top:var(--border-w) solid var(--line);padding:10px 14px;gap:8px;min-height:0}
+  .rail>.lbl,.rail #st-next{display:none}
+  .stlyr{margin-top:0;flex:1;min-height:0}
+  .stlyr-box{max-height:none;min-height:0;font-size:16px}
+  .nownow{gap:3vh;padding:8px 0}
+  .chordnow h1{font-size:clamp(64px,15vh,120px)}
+  .runway{width:min(92vw,700px);height:62px;padding:0 18px}
+  .strip{gap:8px;padding:0 12px;flex-wrap:wrap;height:auto;min-height:54px}
 }
 
 .stplay{width:38px;height:38px;border-radius:99px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;flex:none}
@@ -435,9 +444,9 @@ html[data-theme="paper"] .cb{background:var(--s2)}
 html[data-theme="paper"] .stplay{background:var(--line);color:var(--accent)}
 .ststop{width:30px;height:30px;border-radius:99px;border:var(--border-w) solid var(--line2);color:var(--muted);display:grid;place-items:center;flex:none}
 
-.stlyr{margin-top:auto;display:flex;flex-direction:column;gap:8px;min-height:0}
+.stlyr{margin-top:auto;display:flex;flex-direction:column;gap:8px;min-height:0;flex:1}
 .stlyr-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
-.stlyr-box{flex:1;min-height:120px;max-height:34vh;resize:none;background:var(--bg);border:var(--border-w) solid var(--line);border-radius:12px;padding:12px 14px;font:400 15px/1.65 var(--font-ui);color:var(--text);outline:none;overflow-y:auto}
+.stlyr-box{flex:1;min-height:120px;height:auto;max-height:none;resize:none;background:var(--bg);border:var(--border-w) solid var(--line);border-radius:12px;padding:12px 14px;font:400 15px/1.65 var(--font-ui);color:var(--text);outline:none;overflow-y:auto}
 html[data-theme="paper"] .stlyr-box{background:var(--s1)}
 .stlyr-box:focus{border-color:var(--accent-ring)}
 .stlyr-speed{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted)}
@@ -1650,7 +1659,7 @@ function renderStage(state) {
     graph.innerHTML = `<svg class="edges" viewBox="0 0 1392 216" preserveAspectRatio="none"><defs><marker id="st-a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" fill="var(--accent)"/></marker><marker id="st-m" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" fill="var(--muted)"/></marker></defs>${edges}</svg>` +
       filled.map(sec => {
         const p = pos[sec.id];
-        return `<section class="gnode sec-${(state.sections.indexOf(sec) % 3) + 1} ${sec.id === state.currentSectionId ? 'play' : ''}" data-section="${sec.id}" style="left:${p.x}px;top:${p.y}px"><div class="h"><i></i><b>${sec.name}</b><span class="m">×${state.songOrder.filter(x => x === sec.id).length} · ${sec.sequence.reduce((a, b) => a + b.bars, 0)} тактов</span></div><div class="strip2">${sec.sequence.map((bl, bi) => `<div class="cb" data-ci="${bi}" title="${bl.chord.name}"><div class="n">${bl.chord.name}</div><div class="a">${stArrow(state.pattern.strokes[0], true)}${stArrow(state.pattern.strokes[2] || state.pattern.strokes[0], true)}</div></div>`).join('')}</div></section>`;
+        return `<section class="gnode sec-${(state.sections.indexOf(sec) % 3) + 1} ${sec.id === state.currentSectionId ? 'play' : ''}" data-section="${sec.id}" style="left:${p.x}px;top:${p.y}px"><div class="h"><i></i><b>${sec.name}</b><span class="m">×${state.songOrder.filter(x => x === sec.id).length} · ${sec.sequence.reduce((a, b) => a + b.bars, 0)} тактов</span></div><div class="strip2" style="overflow-x:auto;max-width:100%">${sec.sequence.map((bl, bi) => `<div class="cb" data-ci="${bi}" title="${bl.chord.name}"><div class="n">${bl.chord.name}</div><div class="a">${stArrow(state.pattern.strokes[0], true)}${stArrow(state.pattern.strokes[2] || state.pattern.strokes[0], true)}</div></div>`).join('')}</div></section>`;
       }).join('');
   }
   const stLyrics = $('#st-lyrics');

@@ -143,6 +143,9 @@ try:
         check("hybrid: stage lyrics mirror + autoscroll", st_lyr_len > 0 and st_scroll > 0, f"len={st_lyr_len}, scrollTop={st_scroll}")
         check("hybrid: next-rail live rebuild", rail1 != rail2, f"{rail1}->{rail2}")
         check("hybrid: node strip shows all bars", cb_count == verse_len, f"{cb_count}/{verse_len}")
+        five = pg.evaluate("""() => { const s = document.querySelector('.gnode.play .strip2'); const cb = s.querySelector('.cb');
+          return { cbw: cb.offsetWidth, visible: Math.floor((s.clientWidth + 5) / (cb.offsetWidth + 5)), scrollable: s.scrollWidth > s.clientWidth }; }""")
+        check("hybrid: 5-tile window + scroll when longer", five["visible"] == 5 and (five["scrollable"] == (cb_count > 5)), str(five) + f" bars={cb_count}")
         pg.click('#st-stop'); pg.wait_for_timeout(300)
         pg.click('#to-constructor'); pg.wait_for_timeout(400)
         check("hybrid: back to constructor", pg.eval_on_selector('body', 'e=>e.dataset.view') == 'constructor')
@@ -153,6 +156,13 @@ try:
         m.click('#play'); m.wait_for_timeout(1200)
         mok = m.eval_on_selector_all('.lane.current .block', 'e=>e.length') == 1 and m.eval_on_selector('#play', 'e=>e.classList.contains("active")')
         check("mobile 390: add + play", mok)
+        m.click('#to-stage'); m.wait_for_timeout(500)
+        m_lyr_vis = m.is_visible('#st-lyrics') and m.eval_on_selector('#st-lyrics', 'e=>e.getBoundingClientRect().height') > 140
+        m_next_hidden = not m.is_visible('#st-next')
+        m_chord = (m.text_content('#st-chord') or '').strip()
+        check("mobile stage: lyrics fill, no next-rail", m_lyr_vis and m_next_hidden and len(m_chord) > 0, f"lyr={m_lyr_vis}, next={m_next_hidden}")
+        m.screenshot(path=str(shots/"e2e-mobile-stage.png"))
+        m.click('#to-constructor'); m.wait_for_timeout(300)
         m.screenshot(path=str(shots/"e2e-mobile.png"), full_page=True)
         m.close(); b.close()
 finally:
