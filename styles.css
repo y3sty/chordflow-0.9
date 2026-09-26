@@ -402,20 +402,20 @@ html[data-theme="paper"] .horizon{background-color:var(--bg)}
 .ghost{border:var(--border-w) dashed var(--line2);border-radius:14px;padding:10px 16px;color:var(--muted);font-size:12px;font-weight:700}
 .hgraph{position:absolute;inset:34px 24px 14px}
 .hgraph svg.edges{position:absolute;inset:0;width:100%;height:100%}
-.gnode{position:absolute;width:298px;background:var(--s2);border:var(--border-w) solid var(--line2);border-radius:16px;padding:11px 12px 9px}
+.gnode{position:absolute;width:298px;display:flex;flex-direction:column;gap:8px;background:var(--s2);border:var(--border-w) solid var(--line2);border-radius:16px;padding:11px 12px 9px}
 html[data-theme="paper"] .gnode{background:var(--s1);border-color:var(--line)}
-.gnode .h{display:flex;align-items:center;gap:8px}
+.gnode .h{display:flex;align-items:center;gap:8px;flex:none;position:relative;z-index:2}
 .gnode .h i{width:9px;height:9px;border-radius:3px;background:var(--sec,var(--faint))}
 .gnode .h b{font-family:var(--font-disp);font-weight:800;font-size:13.5px;letter-spacing:-.02em}
 .gnode .h .m{font:600 9.5px var(--font-mono);color:var(--muted)}
-.gnode .strip2{display:flex;gap:5px;margin-top:8px}
+.gnode .strip2{display:flex;gap:5px;margin-top:0;width:100%;flex:none;position:relative;z-index:1}
 .cb{flex:none;width:50px;border:var(--border-w) solid var(--line);border-radius:8px;background:var(--bg);padding:4px 3px 3px;text-align:center}
 html[data-theme="paper"] .cb{background:var(--s2)}
 .cb .n{font-weight:800;font-size:12.5px}
 .cb .a{display:flex;gap:1.5px;justify-content:center;height:10px;align-items:flex-end;margin-top:3px}
 .cb .a .ar{width:6px;height:12px}
 .cb.lit{border-color:var(--accent);background:var(--accent-soft)}
-.gnode.play{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft),0 0 34px var(--accent-ring)}
+.gnode.playing{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft),0 0 34px var(--accent-ring)}
 @media (max-width:900px){
   #stage-view{height:100dvh}
   .stagegrid{grid-template-columns:1fr;grid-template-rows:auto 1fr;min-height:0}

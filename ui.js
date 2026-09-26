@@ -484,7 +484,7 @@ export function renderStage(state) {
     graph.innerHTML = `<svg class="edges" viewBox="0 0 1392 216" preserveAspectRatio="none"><defs><marker id="st-a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" fill="var(--accent)"/></marker><marker id="st-m" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" fill="var(--muted)"/></marker></defs>${edges}</svg>` +
       filled.map(sec => {
         const p = pos[sec.id];
-        return `<section class="gnode sec-${(state.sections.indexOf(sec) % 3) + 1} ${sec.id === state.currentSectionId ? 'play' : ''}" data-section="${sec.id}" style="left:${p.x}px;top:${p.y}px"><div class="h"><i></i><b>${sec.name}</b><span class="m">×${state.songOrder.filter(x => x === sec.id).length} · ${sec.sequence.reduce((a, b) => a + b.bars, 0)} тактов</span></div><div class="strip2" style="overflow-x:auto;max-width:100%">${sec.sequence.map((bl, bi) => `<div class="cb" data-ci="${bi}" title="${bl.chord.name}"><div class="n">${bl.chord.name}</div><div class="a">${stArrow(state.pattern.strokes[0], true)}${stArrow(state.pattern.strokes[2] || state.pattern.strokes[0], true)}</div></div>`).join('')}</div></section>`;
+        return `<section class="gnode sec-${(state.sections.indexOf(sec) % 3) + 1} ${sec.id === state.currentSectionId ? 'playing' : ''}" data-section="${sec.id}" style="left:${p.x}px;top:${p.y}px"><div class="h"><i></i><b>${sec.name}</b><span class="m">×${state.songOrder.filter(x => x === sec.id).length} · ${sec.sequence.reduce((a, b) => a + b.bars, 0)} тактов</span></div><div class="strip2" style="overflow-x:auto;max-width:100%">${sec.sequence.map((bl, bi) => `<div class="cb" data-ci="${bi}" title="${bl.chord.name}"><div class="n">${bl.chord.name}</div><div class="a">${stArrow(state.pattern.strokes[0], true)}${stArrow(state.pattern.strokes[2] || state.pattern.strokes[0], true)}</div></div>`).join('')}</div></section>`;
       }).join('');
   }
   const stLyrics = $('#st-lyrics');
@@ -537,7 +537,7 @@ export function updateStagePlayhead(item, step) {
   document.querySelectorAll('#st-beats i').forEach((el, i) => el.classList.toggle('on', i === Math.floor((step % 8) / 2)));
   document.querySelectorAll('.gnode').forEach(node => {
     const on = node.dataset.section === item.sectionId;
-    node.classList.toggle('play', on);
+    node.classList.toggle('playing', on);
     if (on) node.querySelectorAll('.cb').forEach((c, i) => c.classList.toggle('lit', i === item.localIndex));
   });
 }

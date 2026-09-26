@@ -19,7 +19,7 @@
 | pattern switch: mute available + mute arrows | ✅ PASS  |
 | bpm steppers | ✅ PASS 95/90 |
 | loop toggle flips state | ✅ PASS True->False |
-| play: transport + playhead advances | ✅ PASS Куплет · такт 1 · удар 6 -> Куплет · такт 1 · удар 8 |
+| play: transport + playhead advances | ✅ PASS Куплет · такт 1 · удар 4 -> Куплет · такт 1 · удар 6 |
 | stop resets position | ✅ PASS  |
 | background WAV render + play | ✅ PASS  |
 | lyrics autoscroll | ✅ PASS scrollTop=1313 |

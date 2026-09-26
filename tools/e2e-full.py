@@ -138,12 +138,12 @@ try:
         rail1 = (pg.text_content('#st-next .ncard .n') or '').strip()
         pg.wait_for_timeout(3000)
         rail2 = (pg.text_content('#st-next .ncard .n') or '').strip()
-        cb_count = pg.eval_on_selector_all('.gnode.play .cb', 'e=>e.length')
+        cb_count = pg.eval_on_selector_all('.gnode.playing .cb', 'e=>e.length')
         verse_len = pg.eval_on_selector_all('.lane[data-lane="verse"] .block', 'e=>e.length')
         check("hybrid: stage lyrics mirror + autoscroll", st_lyr_len > 0 and st_scroll > 0, f"len={st_lyr_len}, scrollTop={st_scroll}")
         check("hybrid: next-rail live rebuild", rail1 != rail2, f"{rail1}->{rail2}")
         check("hybrid: node strip shows all bars", cb_count == verse_len, f"{cb_count}/{verse_len}")
-        five = pg.evaluate("""() => { const s = document.querySelector('.gnode.play .strip2'); const cb = s.querySelector('.cb');
+        five = pg.evaluate("""() => { const s = document.querySelector('.gnode.playing .strip2'); const cb = s.querySelector('.cb');
           return { cbw: cb.offsetWidth, visible: Math.floor((s.clientWidth + 5) / (cb.offsetWidth + 5)), scrollable: s.scrollWidth > s.clientWidth }; }""")
         check("hybrid: 5-tile window + scroll when longer", five["visible"] == 5 and (five["scrollable"] == (cb_count > 5)), str(five) + f" bars={cb_count}")
         pg.click('#st-stop'); pg.wait_for_timeout(300)
